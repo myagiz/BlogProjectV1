@@ -5,35 +5,33 @@ using DataAccess.Queries;
 using Entities.DTOs;
 using Entities.Entity;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataAccess.Concrete.Dapper
 {
-    public class DapperCategoryDal : ICategoryDal
+    public class DapperPostDal : IPostDal
     {
         private readonly BlogProjectDapperContext _context;
 
-        public DapperCategoryDal(BlogProjectDapperContext context)
+        public DapperPostDal(BlogProjectDapperContext context)
         {
             _context = context;
         }
-
-        public async Task AddCategoryAsync(CreateCategoryDto model)
+        public async Task AddPostAsync(CreatePostDto model)
         {
-
             var parameters = new DynamicParameters();
             parameters.Add("Name", model.Name, DbType.String);
+            parameters.Add("CategoryId", model.CategoryId, DbType.Int32);
+            parameters.Add("Description", model.Description, DbType.String);
             parameters.Add("CreateDate", DateTime.Now, DbType.DateTime);
             parameters.Add("IsActive", true, DbType.Boolean);
             using (var connection = _context.CreateConnection())
             {
-                var id = await connection.QuerySingleAsync<int>(DapperQueries.AddCategoryQuery, parameters);
+                var id = await connection.QuerySingleAsync<int>(DapperQueries.AddPostQuery, parameters);
                 var created = new Category
                 {
                     Id = id,
@@ -44,48 +42,50 @@ namespace DataAccess.Concrete.Dapper
             }
         }
 
-        public async Task DeleteCategoryAsync(int id)
+        public async Task DeletePostAsync(int id)
         {
             var parameters = new DynamicParameters();
             parameters.Add("Id", id, DbType.Int32);
             parameters.Add("IsActive", false, DbType.Boolean);
             using (var connection = _context.CreateConnection())
             {
-                await connection.ExecuteAsync(DapperQueries.DeleteCategoryQuery, parameters);
+                await connection.ExecuteAsync(DapperQueries.DeletePostQuery, parameters);
             }
         }
 
-        public async Task<List<Category>> GetAllAsync()
+        public async Task<List<GetPostDto>> GetAllAsync()
         {
             using (var connection = _context.CreateConnection())
             {
-                var categories = await connection.QueryAsync<Category>(DapperQueries.GetAllCategoriesQuery, new { IsActive = true });
-                return categories.ToList();
+                var data = await connection.QueryAsync<GetPostDto>(DapperQueries.GetAllPostsQuery, new { IsActive = true });
+                return data.ToList();
             }
         }
 
-        public async Task<Category> GetCategoryByIdAsync(int categoryId)
+        public async Task<GetPostDto> GetPostByIdAsync(int postId)
         {
             using (var connection = _context.CreateConnection())
             {
-                var category = await connection.QueryAsync<Category>(DapperQueries.GetCategoryByIdQuery, new { Id = categoryId, IsActive = true });
-                if (category != null)
+                var data = await connection.QueryAsync<GetPostDto>(DapperQueries.GetPostByIdQuery, new { Id = postId, IsActive = true });
+                if (data != null)
                 {
-                    return category.FirstOrDefault();
+                    return data.FirstOrDefault();
                 }
 
                 return null;
             }
         }
 
-        public async Task UpdateCategoryAsync(UpdateCategoryDto model)
+        public async Task UpdatePostAsync(UpdatePostDto model)
         {
             var parameters = new DynamicParameters();
             parameters.Add("Id", model.Id, DbType.Int32);
+            parameters.Add("CategoryId", model.CategoryId, DbType.Int32);
             parameters.Add("Name", model.Name, DbType.String);
+            parameters.Add("Description", model.Description, DbType.String);
             using (var connection = _context.CreateConnection())
             {
-                await connection.ExecuteAsync(DapperQueries.UpdateCategoryQuery, parameters);
+                await connection.ExecuteAsync(DapperQueries.UpdatePostQuery, parameters);
             }
         }
     }

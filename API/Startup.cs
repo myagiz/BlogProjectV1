@@ -32,8 +32,13 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<BlogProjectDapperContext>();
+
             services.AddSingleton<ICategoryDal, DapperCategoryDal>();
             services.AddSingleton<ICategoryService, CategoryManager>();
+
+            services.AddSingleton<IPostDal, DapperPostDal>();
+            services.AddSingleton<IPostService, PostManager>();
+
             services.AddControllers();
 
             services.AddSwaggerGen(c =>

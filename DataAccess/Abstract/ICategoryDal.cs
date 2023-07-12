@@ -1,4 +1,5 @@
-﻿using Entities.Entity;
+﻿using Entities.DTOs;
+using Entities.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,8 @@ namespace DataAccess.Abstract
     {
         Task<List<Category>> GetAllAsync();
         Task<Category> GetCategoryByIdAsync(int categoryId);
+        Task AddCategoryAsync(CreateCategoryDto model);
+        Task UpdateCategoryAsync(UpdateCategoryDto model);
+        Task DeleteCategoryAsync(int id);
     }
 }

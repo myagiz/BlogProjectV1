@@ -1,5 +1,10 @@
 ﻿using Business.Abstract;
+using Business.Constants;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete.ErrorResults;
+using Core.Utilities.Results.Concrete.SuccessResults;
 using DataAccess.Abstract;
+using Entities.DTOs;
 using Entities.Entity;
 using System;
 using System.Collections.Generic;
@@ -18,20 +23,40 @@ namespace Business.Concrete
             _categoryDal = categoryDal;
         }
 
-        public async Task<List<Category>> GetAllAsync()
+        public async Task<IResult> AddCategoryAsync(CreateCategoryDto model)
         {
-            var result = await _categoryDal.GetAllAsync();
-            return result;
+            await _categoryDal.AddCategoryAsync(model);
+            return new SuccessResult(Messages.AddMethodSuccessfully);
         }
 
-        public Task<Category> GetCategoryByIdAsync(int categoryId)
+        public async Task<IResult> DeleteCategoryAsync(int id)
         {
-            var result = _categoryDal.GetCategoryByIdAsync(categoryId);
+            await _categoryDal.DeleteCategoryAsync(id);
+            return new SuccessResult(Messages.DeleteMethodSuccessfully);
+
+        }
+
+        public async Task<IDataResult<List<Category>>> GetAllAsync()
+        {
+            var result = await _categoryDal.GetAllAsync();
+            return new SuccessDataResult<List<Category>>(result);
+        }
+
+        public async Task<IDataResult<Category>> GetCategoryByIdAsync(int categoryId)
+        {
+            var result = await _categoryDal.GetCategoryByIdAsync(categoryId);
             if (result == null)
             {
-                return null;
+                return new ErrorDataResult<Category>(Messages.NotFoundId);
             }
-            return result;
+            return new SuccessDataResult<Category>(result);
+        }
+
+        public async Task<IResult> UpdateCategoryAsync(UpdateCategoryDto model)
+        {
+            await _categoryDal.UpdateCategoryAsync(model);
+            return new SuccessResult(Messages.UpdateMethodSuccessfully);
+
         }
     }
 }

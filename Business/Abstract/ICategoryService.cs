@@ -1,4 +1,6 @@
-﻿using Entities.Entity;
+﻿using Core.Utilities.Results.Abstract;
+using Entities.DTOs;
+using Entities.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,10 @@ namespace Business.Abstract
 {
     public interface ICategoryService
     {
-        Task<List<Category>> GetAllAsync();
-        Task<Category> GetCategoryByIdAsync(int categoryId);
+        Task<IDataResult<List<Category>>> GetAllAsync();
+        Task<IDataResult<Category>> GetCategoryByIdAsync(int categoryId);
+        Task<IResult> AddCategoryAsync(CreateCategoryDto model);
+        Task<IResult> UpdateCategoryAsync(UpdateCategoryDto model);
+        Task<IResult> DeleteCategoryAsync(int id);
     }
 }
