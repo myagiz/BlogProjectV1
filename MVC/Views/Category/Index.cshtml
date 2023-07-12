@@ -1,0 +1,132 @@
+﻿@model MVC.Models.AllModel
+
+@if (TempData["Error"]! != null)
+{
+    <div style="margin-bottom:20px" class="alert alert-danger" role="alert">
+
+        <div class="text-danger">@TempData["Error"]</div>
+    </div>
+
+}
+
+<div id="editFormContainer" class="card" style="margin-bottom:20px;padding:15px;box-shadow: 5px 4px 12px 0px #00000052;display:none">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="editForm" asp-controller="Home" asp-action="Update" method="post">
+                <input type="hidden" id="id" asp-for="UpdateCategory.Id" />
+                <input type="hidden" value="Category" asp-for="ContentType" />
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label"><strong>Kategori Adı</strong></label>
+                    <div class="col-md-10">
+                        <input maxlength="150" id="name" asp-for="UpdateCategory.Name" class="form-control form-control-sm" placeholder="Kategori adı giriniz" />
+                    </div>
+                </div>
+                <div class="form-group" align="right">
+                    <div class="col-md-10 offset-md-2">
+                        <a id="hideEditForm" class="btn btn-danger btn-sm" style="color:white">Vazgeç</a>
+                        <button type="submit" class="btn btn-info btn-sm">Düzenle</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="categoryListContainer" class="card" style="padding:15px;box-shadow: 5px 4px 12px 0px #00000052">
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Kategori</th>
+                <th>Oluşturma Tarihi</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.ListCategory)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.CreateDate</td>
+                    <td align="right">
+                        <button onclick="editItem(@item.Id)" class="btn btn-success mr-2 btn-sm">Düzenle</button>
+                    </td>
+                    <td align="right">
+                        <form action="/home/deleteMethod?postId=null&categoryId=@item.Id" method="post" style="display: inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Sil</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.10.20/i18n/Turkish.json"
+            }
+        });
+    });
+
+    document.getElementById("showAddForm").addEventListener("click", function () {
+        document.getElementById("addFormContainer").style.display = "block";
+        $('#editFormContainer').hide();
+    });
+
+    document.getElementById("hideAddForm").addEventListener("click", function () {
+        document.getElementById("addFormContainer").style.display = "none";
+        $('#editFormContainer').hide();
+    });
+
+    document.getElementById("hideEditForm").addEventListener("click", function () {
+        document.getElementById("editFormContainer").style.display = "none";
+    });
+
+    function editItem(itemId) {
+        $.ajax({
+            url: '/Category/GetCategory',
+            type: 'GET',
+            data: { id: itemId },
+            success: function (result) {
+                $('#id').val(result.category.id);
+                $('#name').val(result.category.name);
+
+                $('#editFormContainer').show();
+                $('#addFormContainer').hide();
+            },
+            error: function (error) {
+
+            }
+        });
+    }
+
+    $(function () {
+        $('#editForm').submit(function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '/Home/UpdateMethod',
+                type: 'POST',
+                data: $('#editForm').serialize(),
+                success: function (result) {
+                    //refreshGetAllCategories();
+                    location.reload();
+                    $('#editFormContainer').hide();
+                    $('#addFormContainer').hide();
+
+                },
+                error: function (error) {
+
+                }
+            });
+        });
+    });
+
+</script>

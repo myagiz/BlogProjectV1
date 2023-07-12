@@ -1,8 +1,252 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@model MVC.Models.AllModel
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div style="margin-bottom:20px;text-align: right;">
+    <div class="row">
+        <div class="col-md-9">
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary" id="showAddForm">Ekleme İşlemleri</button>
+        </div>
+    </div>
 </div>
+
+@if (TempData["Error"]! != null)
+{
+    <div style="margin-bottom:20px" class="alert alert-danger" role="alert">
+
+        <div class="text-danger">@TempData["Error"]</div>
+    </div>
+
+}
+
+<div id="addFormContainer" class="card" style="margin-bottom:20px;padding:15px;box-shadow: 5px 4px 12px 0px #00000052;display:none">
+    <form asp-action="AddMethod" asp-controller="Home" method="post">
+        <div class="form-group">
+            <label for="content-type">Ekleme Türü</label>
+            <select class="form-control" asp-for="ContentType" id="content-type">
+                <option value="">Ekleme türü seçiniz</option>
+                <option value="Blog">Blog</option>
+                <option value="Category">Kategori</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="blog-section">
+            <label for="blog-title">Başlık</label>
+            <input class="form-control" asp-for="CreatePost.Name" id="blog-title" />
+        </div>
+
+        <div class="form-group" id="blog-categoryId">
+            <label for="blog-categoryId">Kategori</label>
+            @Html.DropDownListFor(x=>x.CreatePost.CategoryId,(List<SelectListItem>)ViewBag.Categories,new {@class="form-control form-control-sm"})
+        </div>
+
+        <div class="form-group" id="blog-description">
+            <label for="blog-description">Detay</label>
+            <textarea class="form-control" asp-for="CreatePost.Description" id="blog-description"></textarea>
+        </div>
+
+        <div class="form-group" id="category-section">
+            <label for="category-name">Kategori Adı</label>
+            <input class="form-control" asp-for="CreateCategory.Name" />
+        </div>
+
+        <div class="form-group" align="right" id="add-section">
+            <div class="col-md-10 offset-md-2">
+                <a id="hideAddForm" class="btn btn-danger btn-sm" style="color:white">Vazgeç</a>
+                <button type="submit" class="btn btn-primary btn-sm">Kaydet</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<div id="editFormContainer" class="card" style="margin-bottom:20px;padding:15px;box-shadow: 5px 4px 12px 0px #00000052;display:none">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="editForm" asp-controller="Home" asp-action="Update" method="post">
+                <input type="hidden" id="id" asp-for="UpdatePost.Id" />
+                <input type="hidden" value="Blog" asp-for="ContentType" />
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label"><strong>Başlık</strong></label>
+                    <div class="col-md-10">
+                        <input maxlength="150" id="name" asp-for="UpdatePost.Name" class="form-control form-control-sm" placeholder="Başlık giriniz" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label"><strong>Kategori</strong></label>
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(x=>x.UpdatePost.CategoryId,(List<SelectListItem>)ViewBag.Categories,new {@class="form-control form-control-sm",id="categoryId"})
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label"><strong>Detay</strong></label>
+                    <div class="col-md-10">
+                        <textarea maxlength="150" id="description" asp-for="UpdatePost.Description" class="form-control form-control-sm" placeholder="Detay giriniz"></textarea>
+                    </div>
+                </div>
+                <div class="form-group" align="right">
+                    <div class="col-md-10 offset-md-2">
+                        <a id="hideEditForm" class="btn btn-danger btn-sm" style="color:white">Vazgeç</a>
+                        <button type="submit" class="btn btn-info btn-sm">Düzenle</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div id="categoryListContainer" class="card" style="padding:15px;box-shadow: 5px 4px 12px 0px #00000052">
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Kategori</th>
+                <th>Başlık</th>
+                <th>Detay</th>
+                <th>Oluşturma Tarihi</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.ListPost)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.CategoryName</td>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>@item.CreateDate</td>
+                    <td align="right">
+                        <button onclick="editItem(@item.Id)" class="btn btn-success mr-2 btn-sm">Düzenle</button>
+                    </td>
+                    <td align="right">
+                        <form action="/home/deleteMethod?postId=@item.Id&categoryId=null" method="post" style="display: inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Sil</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.10.20/i18n/Turkish.json"
+            }
+        });
+    });
+
+    document.getElementById("showAddForm").addEventListener("click", function () {
+        document.getElementById("addFormContainer").style.display = "block";
+        $('#editFormContainer').hide();
+        $("#blog-section").hide();
+        $("#blog-categoryId").hide();
+        $("#blog-description").hide();
+        $("#category-section").hide();
+        $("#add-section").hide();
+
+    });
+
+    document.getElementById("hideAddForm").addEventListener("click", function () {
+        document.getElementById("addFormContainer").style.display = "none";
+        $('#editFormContainer').hide();
+        $("#blog-section").hide();
+        $("#blog-categoryId").hide();
+        $("#blog-description").hide();
+        $("#category-section").hide();
+        $("#add-section").hide();
+
+    });
+
+    document.getElementById("hideEditForm").addEventListener("click", function () {
+        document.getElementById("editFormContainer").style.display = "none";
+    });
+
+    function editItem(itemId) {
+        $.ajax({
+            url: '/Home/GetPost',
+            type: 'GET',
+            data: { id: itemId },
+            success: function (result) {
+                $('#id').val(result.post.id);
+                $('#categoryId').val(result.post.categoryId);
+                $('#name').val(result.post.name);
+                $('#description').val(result.post.description);
+
+                console.log(result.post.id)
+                console.log(result.post.description)
+
+                $('#editFormContainer').show();
+                $('#addFormContainer').hide();
+            },
+            error: function (error) {
+
+            }
+        });
+    }
+
+    $(function () {
+        $('#editForm').submit(function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '/Home/UpdateMethod',
+                type: 'POST',
+                data: $('#editForm').serialize(),
+                success: function (result) {
+                    //refreshGetAllCategories();
+                    location.reload();
+                    $('#editFormContainer').hide();
+                    $('#addFormContainer').hide();
+
+                },
+                error: function (error) {
+
+                }
+            });
+        });
+    });
+
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $("#content-type").on("change", function () {
+            var selectedType = $(this).val();
+            if (selectedType === "Blog") {
+                $("#blog-section").show();
+                $("#blog-categoryId").show();
+                $("#blog-description").show();
+                $("#category-section").hide();
+                $("#add-section").show();
+
+            } else if (selectedType === "Category") {
+                $("#blog-section").hide();
+                $("#blog-categoryId").hide();
+                $("#blog-description").hide();
+                $("#category-section").show();
+                $("#add-section").show();
+
+
+            }
+            else {
+                $("#blog-section").hide();
+                $("#blog-categoryId").hide();
+                $("#blog-description").hide();
+                $("#category-section").hide();
+                $("#add-section").hide();
+
+            }
+        });
+    });
+</script>
