@@ -43,40 +43,5 @@ namespace API.Controllers
 
         }
 
-        [HttpPost("AddCategoryAsync")]
-        public async Task<IActionResult> AddCategoryAsync(CreateCategoryDto model)
-        {
-            var result = await _categoryService.AddCategoryAsync(model);
-            if (result.Success)
-            {
-                return Ok(result);
-
-            }
-            return BadRequest(result);
-        }
-
-        [HttpPut("UpdateCategoryAsync")]
-        public async Task<IActionResult> UpdateCategoryAsync(UpdateCategoryDto model)
-        {
-            var result = await _categoryService.UpdateCategoryAsync(model);
-            if (result.Success)
-            {
-                return Ok(result);
-
-            }
-            return BadRequest(result);
-        }
-
-        [HttpDelete("DeleteCategoryAsync/{categoryId}")]
-        public async Task<IActionResult> DeleteCategoryAsync(int categoryId)
-        {
-            var result = await _categoryService.DeleteCategoryAsync(categoryId);
-            if (result.Success)
-            {
-                return Ok(result);
-
-            }
-            return BadRequest(result);
-        }
     }
 }
