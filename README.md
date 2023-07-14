@@ -3,4 +3,4 @@
 
 2-) appsettings'lerin içindeki SqlConnection'ları kendi db bilgileriniz ile düzenleyip bağlantınızı sağlayınız.
 
-3-) API ve MVC olarak iki proje olarak bulunmaktadır isterseniz ikisinide ayağa multiple startup projects kısmından ayağa kaldırıp çalıştırabilirsiniz
+3-) API ve MVC olarak iki proje olarak bulunmaktadır.Multiple startup projects kısmından iki projeyide ayağa kaldırıp çalıştırabilirsiniz.
